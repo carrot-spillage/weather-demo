@@ -17,7 +17,7 @@ export default function Home() {
           class="w-32 h-32"
           alt="the fresh logo: a sliced lemon dripping with juice"
         />
-        <p class="my-6">
+        <p class="my-6 btn btn-primary">
           {altitude}
         </p>
       </div>
