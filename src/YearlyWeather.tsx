@@ -9,9 +9,18 @@ import {
 } from "recharts";
 
 import { Temporal } from "@js-temporal/polyfill";
-import { useState } from "react";
+import { memo, useState } from "react";
 
-function sinusoidThroughoutYear(year: number, baseTemperature: number) {
+type DataItem = {
+  date: Temporal.PlainDate;
+  day: number;
+  value: number;
+};
+
+function sinusoidThroughoutYear(
+  year: number,
+  baseTemperature: number,
+): DataItem[] {
   const startDate = new Temporal.PlainDate(year, 1, 1); // January 1st of the specified year
   const endDate = new Temporal.PlainDate(year, 12, 31); // December 31st of the specified year
   const totalDays = endDate.dayOfYear; // Total number of days
@@ -51,6 +60,12 @@ const YearlyWeather = ({
         height={300}
         data={data}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        onClick={(x: { activePayload: [{ payload: DataItem }] }) =>
+          onDayChange({
+            dateTime: x.activePayload[0].payload.date
+              .toZonedDateTime({ timeZone: "utc" }),
+            baseTemperature: x.activePayload[0].payload.value,
+          })}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
@@ -65,22 +80,8 @@ const YearlyWeather = ({
           dot={false}
         />
       </LineChart>
-      <input
-        style={{ width: "100%" }}
-        type="range"
-        min={0}
-        max={data.length - 1}
-        defaultValue={0}
-        onChange={(e) =>
-          onDayChange({
-            dateTime: new Temporal.PlainDate(year, 1, 1)
-              .add({ days: e.target.valueAsNumber })
-              .toZonedDateTime({ timeZone: "utc" }),
-            baseTemperature: data[e.target.valueAsNumber].value,
-          })}
-      />
     </div>
   );
 };
 
-export default YearlyWeather;
+export default memo(YearlyWeather);

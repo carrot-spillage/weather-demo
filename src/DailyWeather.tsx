@@ -1,5 +1,5 @@
 import { Temporal } from "@js-temporal/polyfill";
-import { useState } from "react";
+import { useMemo } from "react";
 import SunCalc from "suncalc";
 
 import {
@@ -22,6 +22,7 @@ function getHourlyWeather(
 
   return new Array(24).fill(0).map((_, hour) => {
     const hourlyInstant = startOfDay.add({ hours: hour - 1 }); // to offset temperature change that takes an hour to have an effect
+    console.log("baseTemperature", baseTemperature);
     const { altitude } = SunCalc.getPosition(
       new Date(hourlyInstant.epochMilliseconds),
       latitude,
@@ -38,8 +39,9 @@ export function DailyWeather({
   dateTime: Temporal.ZonedDateTime;
   baseTemperature: number;
 }) {
-  const [data] = useState(() =>
-    getHourlyWeather(dateTime, 35.6762, 139.6503, baseTemperature)
+  const data = useMemo(
+    () => getHourlyWeather(dateTime, 35.6762, 139.6503, baseTemperature),
+    [dateTime, baseTemperature],
   );
 
   return (
