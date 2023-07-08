@@ -16,7 +16,7 @@ function getHourlyWeather(
   dateTime: Temporal.ZonedDateTime,
   latitude: number,
   longitude: number,
-  baseTemperature: number
+  baseTemperature: number,
 ) {
   const startOfDay = dateTime.toInstant();
 
@@ -25,7 +25,7 @@ function getHourlyWeather(
     const { altitude } = SunCalc.getPosition(
       new Date(hourlyInstant.epochMilliseconds),
       latitude,
-      longitude
+      longitude,
     );
     return { hour, value: baseTemperature + altitude * 1.5 };
   });
@@ -43,7 +43,7 @@ export function DailyWeather({
   );
 
   return (
-    <div>
+    <div className="flex">
       <h3>{dateTime.toPlainDate().toLocaleString()}</h3>
       <div style={{ width: "1600px", height: "600px" }}>
         <LineChart

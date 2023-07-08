@@ -4,8 +4,17 @@
     "dev": "deno run -A --unstable --node-modules-dir npm:vite",
     "build": "deno run -A --unstable --node-modules-dir npm:vite build"
   },
+  "imports": {
+    "suncalc": "https://esm.sh/suncalc@1.9.0",
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "@js-temporal/polyfill": "https://esm.sh/@js-temporal/polyfill@0.4.4",
+    "recharts": "https://esm.sh/recharts@2.7.2"
+  },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "lib": ["ESNext", "dom"]
   }
 }

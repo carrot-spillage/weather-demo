@@ -1,7 +1,6 @@
 import { useState } from "react";
-import "./App.css";
-import YearlyWeather, { DayArgs } from "./YearlyWeather";
-import { DailyWeather } from "./DailyWeather";
+import YearlyWeather, { DayArgs } from "./YearlyWeather.tsx";
+import { DailyWeather } from "./DailyWeather.tsx";
 
 function App() {
   const [dayArgs, setDayArgs] = useState<DayArgs | null>(null);

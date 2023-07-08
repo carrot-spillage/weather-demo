@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-// @deno-types="../temporal.d.ts"
+
 import { Temporal } from "@js-temporal/polyfill";
 import { useState } from "react";
 
@@ -77,8 +77,7 @@ const YearlyWeather = ({
               .add({ days: e.target.valueAsNumber })
               .toZonedDateTime({ timeZone: "utc" }),
             baseTemperature: data[e.target.valueAsNumber].value,
-          })
-        }
+          })}
       />
     </div>
   );
