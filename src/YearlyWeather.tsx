@@ -9,7 +9,7 @@ import {
 } from "recharts";
 
 import { Temporal } from "@js-temporal/polyfill";
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 
 type DataItem = {
   date: Temporal.PlainDate;
@@ -25,15 +25,19 @@ function sinusoidThroughoutYear(
   const endDate = new Temporal.PlainDate(year, 12, 31); // December 31st of the specified year
   const totalDays = endDate.dayOfYear; // Total number of days
 
-  const midJulyDay = Math.ceil(totalDays / 2); // Day number of mid-July
+  const summerPeakOffset = totalDays * 0.3;
 
   const amplitude = 1; // Adjust the amplitude of the sinusoid as needed
-  const frequency = (2 * Math.PI) / 365; // Frequency for a yearly cycle (in radians)
+  const frequency = (2 * Math.PI) / totalDays; // Frequency for a yearly cycle (in radians)
+
+  const positiveAmplification = 1.8;
 
   const data = new Array(totalDays).fill(0).map((_, day) => {
-    const angle = frequency * (day - midJulyDay);
-    const value = amplitude * Math.sin(angle) * baseTemperature;
-
+    const angle = frequency * (day - summerPeakOffset);
+    let value = amplitude * Math.sin(angle) * baseTemperature;
+    if (value > 0) {
+      value = value * positiveAmplification;
+    }
     return { date: startDate.add({ days: day }), day, value };
   });
 
@@ -45,13 +49,22 @@ export type DayArgs = {
   baseTemperature: number;
 };
 
+const monthFormatter = new Intl.DateTimeFormat("en", { month: "short" });
+
 const YearlyWeather = ({
   onDayChange,
 }: {
   onDayChange: (args: DayArgs) => void;
 }) => {
   const year = 2023;
-  const [data] = useState(() => sinusoidThroughoutYear(year, 12));
+  const data = useMemo(
+    () =>
+      sinusoidThroughoutYear(year, 12).map((x) => ({
+        ...x,
+        month: x.date.month,
+      })),
+    [year],
+  );
 
   return (
     <div style={{ width: "600px", height: "300px" }}>
@@ -68,7 +81,12 @@ const YearlyWeather = ({
           })}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
+        <XAxis
+          dataKey="month"
+          ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+          tickFormatter={(month: number) =>
+            monthFormatter.format(new Date(year, month - 1))}
+        />
         <YAxis dataKey="value" />
         <Tooltip />
         <Legend />

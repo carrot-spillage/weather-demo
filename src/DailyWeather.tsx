@@ -45,8 +45,8 @@ export function DailyWeather({
   );
 
   return (
-    <div className="flex">
-      <h3>{dateTime.toPlainDate().toLocaleString()}</h3>
+    <div>
+      <h3>{dateTime.toPlainDate().toString()}</h3>
       <div style={{ width: "1600px", height: "600px" }}>
         <LineChart
           width={1600}
