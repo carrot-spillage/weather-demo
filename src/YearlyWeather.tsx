@@ -45,7 +45,7 @@ function sinusoidThroughoutYear(
 }
 
 export type DayArgs = {
-  dateTime: Temporal.ZonedDateTime;
+  plainDate: Temporal.PlainDate;
   baseTemperature: number;
 };
 
@@ -75,8 +75,7 @@ const YearlyWeather = ({
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         onClick={(x: { activePayload: [{ payload: DataItem }] }) =>
           onDayChange({
-            dateTime: x.activePayload[0].payload.date
-              .toZonedDateTime({ timeZone: "utc" }),
+            plainDate: x.activePayload[0].payload.date,
             baseTemperature: x.activePayload[0].payload.value,
           })}
       >
@@ -93,7 +92,6 @@ const YearlyWeather = ({
         <Line
           type="monotone"
           dataKey="value"
-          name="Flattened Sinusoid"
           stroke="#8884d8"
           dot={false}
         />

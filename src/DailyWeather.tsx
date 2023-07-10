@@ -17,20 +17,27 @@ function getHourlyWeather(
   latitude: number,
   longitude: number,
   baseTemperature: number,
+  dailyChangeRange: { min: number; max: number },
 ) {
-  const startOfDay = dateTime.toInstant();
+  const startOfDay = dateTime;
 
   return new Array(24).fill(0).map((_, hour) => {
-    const hourlyInstant = startOfDay.add({ hours: hour - 1 }); // to offset temperature change that takes an hour to have an effect
-    console.log("baseTemperature", baseTemperature);
+    const offsetDateTime = startOfDay.add({ hours: hour - 1 }); // to offset temperature change that takes an hour to have an effect
     const { altitude } = SunCalc.getPosition(
-      new Date(hourlyInstant.epochMilliseconds),
+      new Date(offsetDateTime.epochMilliseconds),
       latitude,
       longitude,
     );
-    return { hour, value: baseTemperature + altitude * 1.5 };
+
+    return {
+      hour,
+      value: baseTemperature +
+        altitude * (altitude > 0 ? dailyChangeRange.max : dailyChangeRange.min),
+    };
   });
 }
+
+const dailyChangeRange = { min: 4, max: 8 };
 
 export function DailyWeather({
   dateTime,
@@ -40,7 +47,11 @@ export function DailyWeather({
   baseTemperature: number;
 }) {
   const data = useMemo(
-    () => getHourlyWeather(dateTime, 35.6762, 139.6503, baseTemperature),
+    () =>
+      getHourlyWeather(dateTime, 52.697058, 11.665210, baseTemperature, {
+        min: 4,
+        max: 8,
+      }),
     [dateTime, baseTemperature],
   );
 
@@ -62,7 +73,6 @@ export function DailyWeather({
           <Line
             type="monotone"
             dataKey="value"
-            name="Flattened Sinusoid"
             stroke="#8884d8"
             dot={false}
           />

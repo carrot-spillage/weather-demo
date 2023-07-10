@@ -1,7 +1,7 @@
 import { useState } from "react";
 import YearlyWeather, { DayArgs } from "./YearlyWeather.tsx";
 import { DailyWeather } from "./DailyWeather.tsx";
-
+import { Temporal } from "@js-temporal/polyfill";
 function App() {
   const [dayArgs, setDayArgs] = useState<DayArgs | null>(null);
   return (
@@ -9,7 +9,9 @@ function App() {
       <YearlyWeather onDayChange={setDayArgs} />
       {dayArgs && (
         <DailyWeather
-          dateTime={dayArgs.dateTime}
+          dateTime={(dayArgs.plainDate as Temporal.PlainDate).toZonedDateTime({
+            timeZone: "CET",
+          })}
           baseTemperature={dayArgs.baseTemperature}
         />
       )}
