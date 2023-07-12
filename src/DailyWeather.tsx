@@ -17,7 +17,7 @@ function getHourlyWeather(
   latitude: number,
   longitude: number,
   baseTemperature: number,
-  dailyChangeRange: { min: number; max: number },
+  dailyTemperatureChangeRange: { min: number; max: number },
 ) {
   const startOfDay = dateTime;
 
@@ -29,29 +29,36 @@ function getHourlyWeather(
       longitude,
     );
 
+    const temperatureShift = altitude *
+      (altitude > 0
+        ? dailyTemperatureChangeRange.max
+        : -dailyTemperatureChangeRange.min);
+
     return {
       hour,
-      value: baseTemperature +
-        altitude * (altitude > 0 ? dailyChangeRange.max : dailyChangeRange.min),
+      value: baseTemperature * (1 + temperatureShift),
     };
   });
 }
 
-const dailyChangeRange = { min: 4, max: 8 };
-
 export function DailyWeather({
   dateTime,
   baseTemperature,
+  dailyTemperatureChangeRange,
 }: {
   dateTime: Temporal.ZonedDateTime;
   baseTemperature: number;
+  dailyTemperatureChangeRange: { min: number; max: number };
 }) {
   const data = useMemo(
     () =>
-      getHourlyWeather(dateTime, 52.697058, 11.665210, baseTemperature, {
-        min: 4,
-        max: 8,
-      }),
+      getHourlyWeather(
+        dateTime,
+        52.697058,
+        11.665210,
+        baseTemperature,
+        dailyTemperatureChangeRange,
+      ),
     [dateTime, baseTemperature],
   );
 

@@ -13,6 +13,7 @@ function App() {
             timeZone: "CET",
           })}
           baseTemperature={dayArgs.baseTemperature}
+          dailyTemperatureChangeRange={dayArgs.dailyTemperatureChangeRange}
         />
       )}
     </>

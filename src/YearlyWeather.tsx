@@ -47,6 +47,7 @@ function sinusoidThroughoutYear(
 export type DayArgs = {
   plainDate: Temporal.PlainDate;
   baseTemperature: number;
+  dailyTemperatureChangeRange: { min: number; max: number };
 };
 
 const monthFormatter = new Intl.DateTimeFormat("en", { month: "short" });
@@ -77,6 +78,7 @@ const YearlyWeather = ({
           onDayChange({
             plainDate: x.activePayload[0].payload.date,
             baseTemperature: x.activePayload[0].payload.value,
+            dailyTemperatureChangeRange: { min: -0.25, max: 0.5 },
           })}
       >
         <CartesianGrid strokeDasharray="3 3" />
