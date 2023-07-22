@@ -30,7 +30,7 @@ const YearlyWeather = ({
   const data = useMemo(
     () => {
       const startDate = new Temporal.PlainDate(year, 1, 1); // January 1st of the specified year
-      const endDate = startDate.add({ years: 1, days: -1 }); // December 31st of the specified year
+      const endDate = startDate.add({ years: 1 }).add({ days: -1 }); // December 31st of the specified year
       const totalDays = endDate.dayOfYear; // Total number of days
 
       return generateDailyWeatherForYear(totalDays, 12).map((x) => {
