@@ -1,0 +1,26 @@
+import { DataItem } from "./DataItem.ts";
+
+type CycloneState = {
+  pressureChange: number; // from -1 to 1 --- 1 is up -1 is down
+  effectiveness: number; // from 0 to 1
+  humidity: number; // from 0 to 1
+};
+
+export function mixWithCyclone(
+  dataItem: DataItem & { baseHumidity: number },
+  cycloneState: CycloneState,
+  isEffectivenessRising: boolean
+): DataItem & { baseHumidity: number } & {
+  humidity: number;
+  precepitation: number;
+} {
+    const { baseHumidity } = dataItem;
+    const { pressureChange, effectiveness, humidity } = cycloneState;
+    
+    const humidityChange = baseHumidity * (pressureChange * effectiveness);
+    const humidityChangeWithHumidity = humidityChange * humidity;
+    
+    const humidityWithChange = baseHumidity + humidity
+}
+
+// Math.max(0, Math.min(1, precepitation))
