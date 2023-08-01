@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from "react";
 import * as SimplexNoise from "simplex-noise";
-
+import rainCloudIconUrl from "./assets/rain-clouds.svg";
 const N = 40; // Change this value to adjust the grid size N*N
 const noise = SimplexNoise.createNoise2D();
 
 const offset = { x: 0, y: 0 };
 
 const PressureGrid: React.FC = () => {
-  const [pressureGrid, setPressureGrid] = useState<number[][]>([]);
-
-  useEffect(() => {
-    // Initialize the pressure grid with random pressure values between -1.0 and 1.0
-    const initialPressureGrid: number[][] = initGrid();
-    setPressureGrid(initialPressureGrid);
-  }, []);
+  const [weatherGrid, setPressureGrid] = useState<Cell[][]>(() => initGrid());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,7 +24,7 @@ const PressureGrid: React.FC = () => {
     }, 100); // Adjust the interval time (in milliseconds) as needed
 
     return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, [pressureGrid]);
+  }, [weatherGrid]);
 
   useEffect(() => {
     // Update pressure values every 1 second
@@ -43,17 +37,19 @@ const PressureGrid: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      {pressureGrid.map((row, i) => (
+      {weatherGrid.map((row, i) => (
         <div key={i} className="flex">
-          {row.map((pressure, j) => (
+          {row.map((weatherCell, j) => (
             <div
               key={`${i}-${j}`}
               className="w-4 h-4"
-              title={pressure.toString()}
+              title={JSON.stringify(weatherCell, undefined, "  ")}
               style={{
-                backgroundColor: valueToColor(pressure),
+                backgroundColor: valueToColor(weatherCell.pressure),
               }}
-            />
+            >
+              {weatherCell.precipitation > 0 && <img src={rainCloudIconUrl} />}
+            </div>
           ))}
         </div>
       ))}
@@ -63,36 +59,77 @@ const PressureGrid: React.FC = () => {
 
 export default PressureGrid;
 
+type Cell = { pressure: number; clouds: number; precipitation: number };
+
 function stepGrid(
-  prevGrid: number[][],
+  prevGrid: Cell[][],
   randomStepX: number,
   randomStepY: number,
-): number[][] {
-  const newPressureGrid: number[][] = [];
+): Cell[][] {
+  if (randomStepX == 0 && randomStepY == 0) return prevGrid;
+  const newPressureGrid: Cell[][] = [];
+
   for (let i = 0; i < N; i++) {
-    const newRow = [];
+    const newRow: Cell[] = [];
     for (let j = 0; j < N; j++) {
       const oldValueToMove = prevGrid[i - randomStepX]?.[j - randomStepY];
+      const cell = oldValueToMove
+        ? getNextCellState(oldValueToMove)
+        : createCellState(i, j);
 
-      // Check if the new index is within the valid range
-      if (oldValueToMove !== undefined) {
-        newRow.push(oldValueToMove);
-      } else {
-        // Generate a new value using the noise function if the new index is out of bounds
-        newRow.push(noise((i - offset.x) / N, (j - offset.y) / N));
-      }
+      newRow.push(cell);
     }
     newPressureGrid.push(newRow);
   }
   return newPressureGrid;
 }
 
-function initGrid() {
-  const initialPressureGrid: number[][] = [];
+function createCellState(
+  i: number,
+  j: number,
+): Cell {
+  const pressure = noise((i - offset.x) / N, (j - offset.y) / N);
+  const clouds = Math.random() * pressure * 0.2;
+  const precipitation = -Math.random() +
+    Math.random() * (1 - Math.pow(1 - clouds, 2));
+  return { pressure, precipitation, clouds };
+}
+
+const limit = (x: number) =>
+  Math.max(
+    -1,
+    Math.min(
+      1,
+      x,
+    ),
+  );
+
+const signedRandom = () => (Math.random() * 2 - 1);
+
+function getNextCellState(
+  movedCell: Cell,
+): Cell {
+  const cloudsStep = movedCell.precipitation > 0
+    ? (-Math.random() * movedCell.precipitation) // always shrinks cloud if raining
+    : 0.2 * (signedRandom() +
+      (movedCell.pressure > 0 ? 0.2 : 1) * Math.random() * movedCell.pressure);
+
+  const clouds = limit(movedCell.clouds + cloudsStep);
+  const precipitationStep = 0.1 *
+    (-Math.random() * 1 + Math.random() * (1.5 * clouds));
+  return {
+    ...movedCell,
+    clouds,
+    precipitation: limit(movedCell.precipitation + precipitationStep),
+  };
+}
+
+function initGrid(): Cell[][] {
+  const initialPressureGrid: Cell[][] = [];
   for (let i = 0; i < N; i++) {
-    const row: number[] = [];
+    const row: Cell[] = [];
     for (let j = 0; j < N; j++) {
-      row.push(noise(i / N, j / N));
+      row.push(createCellState(i, j));
     }
     initialPressureGrid.push(row);
   }
