@@ -10,7 +10,10 @@
     "react/": "https://esm.sh/react@18.2.0/",
     "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "@js-temporal/polyfill": "https://esm.sh/@js-temporal/polyfill@0.4.4",
-    "recharts": "https://esm.sh/recharts@2.7.2"
+    "recharts": "https://esm.sh/recharts@2.7.2",
+    "@tensorflow/tfjs": "https://esm.sh/@tensorflow/tfjs@4.9.0/dist",
+    "@tensorflow/tfjs-backend-webgpu": "https://esm.sh/@tensorflow/tfjs-backend-webgpu@4.9.0",
+    "simplex-noise": "https://esm.sh/simplex-noise@4.0.1"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
