@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import * as SimplexNoise from "simplex-noise";
-import rainCloudIconUrl from "./assets/rain-clouds.svg";
 const N = 40; // Change this value to adjust the grid size N*N
 const noise = SimplexNoise.createNoise2D();
 
 const offset = { x: 0, y: 0 };
-
+let counter = 0;
 const PressureGrid: React.FC = () => {
   const [weatherGrid, setPressureGrid] = useState<Cell[][]>(() => initGrid());
 
@@ -21,6 +20,11 @@ const PressureGrid: React.FC = () => {
       setPressureGrid((prevGrid) =>
         stepGrid(prevGrid, randomStepX, randomStepY)
       );
+
+      counter++;
+      if (counter > 4) {
+        clearInterval(interval);
+      }
     }, 100); // Adjust the interval time (in milliseconds) as needed
 
     return () => clearInterval(interval); // Cleanup the interval on component unmount
@@ -42,13 +46,26 @@ const PressureGrid: React.FC = () => {
           {row.map((weatherCell, j) => (
             <div
               key={`${i}-${j}`}
-              className="w-4 h-4"
+              className="w-4 h-4 relative flex items-center justify-center"
               title={JSON.stringify(weatherCell, undefined, "  ")}
               style={{
                 backgroundColor: valueToColor(weatherCell.pressure),
               }}
             >
-              {weatherCell.precipitation > 0 && <img src={rainCloudIconUrl} />}
+              {weatherCell.clouds > 0 && (
+                <img
+                  style={{ width: weatherCell.clouds * 100 + "%" }}
+                  src="/cloud.png"
+                />
+              )}
+              {weatherCell.precipitation > 0 && (
+                <div className="flex absolute w-full h-full items-center justify-center top-[20%] left-[20%]">
+                  <img
+                    style={{ width: weatherCell.precipitation * 50 + "%" }}
+                    src="/raindrop.png"
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -110,13 +127,14 @@ function getNextCellState(
   movedCell: Cell,
 ): Cell {
   const cloudsStep = movedCell.precipitation > 0
-    ? (-Math.random() * movedCell.precipitation) // always shrinks cloud if raining
+    ? 0.2 * (-Math.random() * movedCell.precipitation) // always shrinks cloud if raining
     : 0.2 * (signedRandom() +
       (movedCell.pressure > 0 ? 0.2 : 1) * Math.random() * movedCell.pressure);
 
   const clouds = limit(movedCell.clouds + cloudsStep);
-  const precipitationStep = 0.1 *
-    (-Math.random() * 1 + Math.random() * (1.5 * clouds));
+
+  const precipitationStep = -Math.random() * (0.05) +
+    Math.random() * (0.5 * clouds);
   return {
     ...movedCell,
     clouds,
