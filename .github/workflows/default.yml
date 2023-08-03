@@ -34,7 +34,7 @@ jobs:
         with:
           deno-version: vx.x.x
       - name: Build
-        run: deno task build --base /weather-demo
+        run: deno task build --base /weather-demo/
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
