@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import * as SimplexNoise from "simplex-noise";
+import raindropUrl from "./assets/raindrop.png";
+import cloudUrl from "./assets/cloud.png";
+
 const N = 40; // Change this value to adjust the grid size N*N
 const noise = SimplexNoise.createNoise2D();
 
@@ -55,14 +58,14 @@ const PressureGrid: React.FC = () => {
               {weatherCell.clouds > 0 && (
                 <img
                   style={{ width: weatherCell.clouds * 100 + "%" }}
-                  src="/cloud.png"
+                  src={cloudUrl}
                 />
               )}
               {weatherCell.precipitation > 0 && (
                 <div className="flex absolute w-full h-full items-center justify-center top-[20%] left-[20%]">
                   <img
                     style={{ width: weatherCell.precipitation * 50 + "%" }}
-                    src="/raindrop.png"
+                    src={raindropUrl}
                   />
                 </div>
               )}
