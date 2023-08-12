@@ -22,11 +22,12 @@ export type DayArgs = {
 const monthFormatter = new Intl.DateTimeFormat("en", { month: "short" });
 
 const YearlyWeather = ({
+  year,
   onDayChange,
 }: {
+  year: number;
   onDayChange: (args: DayArgs) => void;
 }) => {
-  const year = 2023;
   const data = useMemo(
     () => {
       const startDate = new Temporal.PlainDate(year, 1, 1); // January 1st of the specified year

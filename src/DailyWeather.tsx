@@ -16,10 +16,12 @@ export function DailyWeather({
   dateTime,
   baseTemperature,
   dailyTemperatureChangeRange,
+  rainSequence,
 }: {
   dateTime: Temporal.ZonedDateTime;
   baseTemperature: number;
   dailyTemperatureChangeRange: { min: number; max: number };
+  rainSequence: { hour: number; strength: number }[];
 }) {
   const data = useMemo(
     () =>
@@ -29,7 +31,7 @@ export function DailyWeather({
         11.665210,
         baseTemperature,
         dailyTemperatureChangeRange,
-      ),
+      ).map((x, i) => ({ ...x, rainStrength: rainSequence[i].strength })),
     [dateTime, baseTemperature],
   );
 
@@ -44,7 +46,21 @@ export function DailyWeather({
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="hour" />
+          <XAxis
+            dataKey="hour"
+            tick={(props: unknown) => {
+              const { x, y, height } = props;
+              return (
+                <g>
+                  <g>
+                    <text x={x} y={y + height / 2}>
+                      {data[props.payload.value].rainStrength.toFixed(2)}
+                    </text>
+                  </g>
+                </g>
+              );
+            }}
+          />
           <YAxis dataKey="value" />
           <Tooltip />
           <Legend />
