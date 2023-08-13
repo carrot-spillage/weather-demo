@@ -1,103 +1,73 @@
 import "https://cdn.skypack.dev/@tensorflow/tfjs-backend-webgpu";
 import * as tf from "https://cdn.skypack.dev/@tensorflow/tfjs";
 
-type DataPoint = {
-  temperature: number;
-  hour_of_day: number;
-  elevation: number;
-  surface_pressure: number;
-  wind_speed: number;
-  wind_angle: number;
-  humidity: number;
-  altitude: number;
+// Define the model architecture.
+const model = tf.sequential();
+model.add(tf.layers.dense({units: 100, activation: 'relu', inputShape: [8]}));
+model.add(tf.layers.dense({units: 8, activation: 'linear'}));
+
+// Generate some fake historic data.
+const historicData = [
+  {
+    temperature: 10,
+    hour_of_day: 12,
+    elevation: 100,
+    surface_pressure: 1013,
+    wind_speed: 10,
+    wind_angle: 0,
+    humidity: 50,
+    altitude: 1000,
+  },
+  {
+    temperature: 11,
+    hour_of_day: 13,
+    elevation: 101,
+    surface_pressure: 1012,
+    wind_speed: 9,
+    wind_angle: 10,
+    humidity: 51,
+    altitude: 1001,
+  },
+  {
+    temperature: 12,
+    hour_of_day: 14,
+    elevation: 102,
+    surface_pressure: 1011,
+    wind_speed: 8,
+    wind_angle: 20,
+    humidity: 52,
+    altitude: 1002,
+  },
+  ...
+];
+
+// Split the historic data into training and test sets.
+const trainData = historicData.slice(0, 8);
+const testData = historicData.slice(8);
+
+// Train the model.
+model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+model.fit(trainData);
+
+// Evaluate the model on the test set.
+const predictions = model.predict(testData);
+const errors = predictions.map((prediction, index) => {
+  const actual = testData[index][0];
+  return prediction - actual;
+});
+const error = errors.reduce((a, b) => a + b) / errors.length;
+console.log('Error:', error);
+
+// Use the model to predict new values for the indicators of a cell.
+const cell = {
+  temperature: 13,
+  hour_of_day: 15,
+  elevation: 103,
+  surface_pressure: 1010,
+  wind_speed: 7,
+  wind_angle: 30,
+  humidity: 53,
+  altitude: 1003,
 };
-
-// Function to generate fake historic data for a cell
-function generateFakeData(numDataPoints: number) {
-  const fakeData: DataPoint[] = [];
-  for (let i = 0; i < numDataPoints; i++) {
-    const dataPoint = {
-      temperature: Math.random() * 100,
-      hour_of_day: Math.random() * 24,
-      elevation: Math.random() * 1000,
-      surface_pressure: Math.random() * 1500,
-      wind_speed: Math.random() * 50,
-      wind_angle: Math.random() * 360,
-      humidity: Math.random() * 100,
-      altitude: Math.random() * 5000,
-    };
-    fakeData.push(dataPoint);
-  }
-  return fakeData;
-}
-
-// Fake historic data for a cell (10 data points)
-const cellHistoricData = generateFakeData(10);
-
-// Function to prepare the input data for training the model
-function prepareInputData(historicData: DataPoint[]) {
-  const inputFeatures = [];
-  for (let i = 2; i < historicData.length; i++) {
-    const dataWindow = [
-      historicData[i - 2],
-      historicData[i - 1],
-      historicData[i], // current cell data
-    ];
-    inputFeatures.push(tf.tensor(Object.values(dataWindow), [3, 8]));
-  }
-  return tf.stack(inputFeatures);
-}
-
-// Function to prepare the output data for training the model
-function prepareOutputData(historicData: DataPoint[]) {
-  const outputFeatures = [];
-  for (let i = 2; i < historicData.length; i++) {
-    const nextData = historicData[i];
-    outputFeatures.push(tf.tensor(Object.values(nextData), [8]));
-  }
-  return tf.stack(outputFeatures);
-}
-console.log("inting");
-export function run() {
-  console.log("starting");
-  // Prepare the data for training
-  const inputTensor = prepareInputData(cellHistoricData);
-  const outputTensor = prepareOutputData(cellHistoricData);
-
-  // Create and compile the model
-  const model = tf.sequential();
-  model.add(tf.layers.flatten({ inputShape: [3, 8] }));
-  model.add(tf.layers.dense({ units: 32, activation: "relu" }));
-  model.add(tf.layers.dense({ units: 16, activation: "relu" }));
-  model.add(tf.layers.dense({ units: 8, activation: "linear" })); // Output layer with linear activation
-
-  model.compile({ loss: "meanSquaredError", optimizer: "adam" });
-
-  // Train the model
-  async function trainModel() {
-    const numEpochs = 50;
-    const batchSize = 2;
-    await model.fit(inputTensor, outputTensor, {
-      epochs: numEpochs,
-      batchSize,
-    });
-    console.log("Model training complete!");
-  }
-
-  // Call the trainModel function to start the training process
-  trainModel()
-    .then(() => {
-      // Make predictions using the trained model
-      const newDataWindow = [
-        cellHistoricData[cellHistoricData.length - 2],
-        cellHistoricData[cellHistoricData.length - 1],
-        // Here, you can use actual data or other generated data for adjacent cells
-        generateFakeData(1)[0],
-      ];
-      const inputTensorNewData = tf.tensor(newDataWindow, [1, 3, 8]);
-      const predictions = model.predict(inputTensorNewData) as tf.Tensor;
-      console.log("Predicted new values:");
-      predictions.print();
-    })
-    .catch((error) => console.error("Error training the model:", error));
-}
+const newValues = model.predict(tf.tensor([cell]));
+console.log('New values:', newValues);

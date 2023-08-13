@@ -17,15 +17,17 @@ export function generateHourlyWeather(
       latitude,
       longitude,
     );
-
     const temperatureShift = altitude *
       (altitude > 0
         ? dailyTemperatureChangeRange.max
         : -dailyTemperatureChangeRange.min);
+    console.log("temperatureShift", baseTemperature, hour, temperatureShift);
 
     return {
       hour,
-      value: baseTemperature * (1 + temperatureShift),
+      value: baseTemperature +
+        baseTemperature *
+          (baseTemperature > 0 ? temperatureShift : -temperatureShift),
     };
   });
 }
