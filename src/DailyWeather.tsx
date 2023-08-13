@@ -34,7 +34,6 @@ export function DailyWeather({
       ).map((x, i) => ({ ...x, rainStrength: rainSequence[i].strength })),
     [dateTime, baseTemperature],
   );
-  console.log("data", data);
   return (
     <div>
       <h3>{dateTime.toPlainDate().toString()}</h3>

@@ -21,7 +21,6 @@ function App() {
 
   const rainSequence = dayArgs &&
     hourlyRain.filter((x) => x.day == dayArgs.plainDate.dayOfYear);
-  console.log(rainSequence, hourlyRain);
   return (
     <>
       <PressureGrid />

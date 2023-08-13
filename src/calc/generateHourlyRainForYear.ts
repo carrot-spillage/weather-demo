@@ -7,17 +7,17 @@ export function generateHourlyRainForYear(
     strength: number;
   } = { untilIndex: 0, strength: 0 };
   return new Array(days * 24).fill(0).map((_, hour: number) => {
+    const rainChance = 0.2;
+    const rainFreeChance = 1 - rainChance;
+
     if (sequence.untilIndex <= hour) {
+      const currentRainRandom = Math.random();
       sequence = {
         untilIndex: hour + Math.round(Math.random() * maxHours),
-        strength: Math.random(),
+        strength: currentRainRandom > rainFreeChance
+          ? (currentRainRandom - rainFreeChance) * (1 / rainChance)
+          : 0,
       };
-
-      console.log(sequence, {
-        day: Math.floor(hour / 24),
-        hour: hour % 24,
-        strength: sequence.strength,
-      });
     }
 
     return {

@@ -21,7 +21,6 @@ export function generateHourlyWeather(
       (altitude > 0
         ? dailyTemperatureChangeRange.max
         : -dailyTemperatureChangeRange.min);
-    console.log("temperatureShift", baseTemperature, hour, temperatureShift);
 
     return {
       hour,
