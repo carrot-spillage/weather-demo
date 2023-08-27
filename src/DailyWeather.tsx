@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { generateHourlyWeather } from "./calc/generateHourlyWeather.ts";
+import { WeatherBlock } from "./calc/generateHourlyRainForYear.ts";
 
 export function DailyWeather({
   dateTime,
@@ -21,7 +22,7 @@ export function DailyWeather({
   dateTime: Temporal.ZonedDateTime;
   baseTemperature: number;
   dailyTemperatureChangeRange: { min: number; max: number };
-  rainSequence: { hour: number; strength: number }[];
+  rainSequence: ({ hour: number } & WeatherBlock)[];
 }) {
   const data = useMemo(
     () =>
@@ -31,7 +32,11 @@ export function DailyWeather({
         11.665210,
         baseTemperature,
         dailyTemperatureChangeRange,
-      ).map((x, i) => ({ ...x, rainStrength: rainSequence[i].strength })),
+      ).map((x, i) => ({
+        ...x,
+        rainIntensity: rainSequence[i].rainIntensity,
+        cloudDensity: rainSequence[i].cloudDensity,
+      })),
     [dateTime, baseTemperature],
   );
   return (
@@ -52,8 +57,11 @@ export function DailyWeather({
               return (
                 <g>
                   <g>
-                    <text x={x} y={y + height / 2}>
-                      {data[props.payload.value].rainStrength.toFixed(2)}
+                    <text fontSize={10} x={x} y={y + height / 2}>
+                      {"cl: "}
+                      {data[props.payload.value].cloudDensity.toFixed(2)}
+                      {"    rn: "}
+                      {data[props.payload.value].rainIntensity.toFixed(2)}
                     </text>
                   </g>
                 </g>
