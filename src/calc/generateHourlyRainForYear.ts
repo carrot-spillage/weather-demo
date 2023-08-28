@@ -3,6 +3,11 @@ export type WeatherBlock = {
   rainIntensity: number;
 };
 
+export type CloudPeriod = {
+  curve: Curve;
+  period: number;
+};
+
 export function generateHourlyRainForYear(
   days: number,
 ) {
@@ -12,39 +17,37 @@ export function generateHourlyRainForYear(
   const weatherEntries: WeatherBlock[] = [];
 
   while (hoursLeft > 0) {
-    const period = Math.round(
-      Math.min(hoursLeft, Math.round(Math.random() * maxHours)),
-    );
+    const period = Math.min(hoursLeft, Math.round(Math.random() * maxHours));
     const isOff = Math.random() < 0.5;
     if (isOff) {
-      new Array(period).fill(0).forEach(() =>
-        weatherEntries.push({ cloudDensity: 0, rainIntensity: 0 })
-      );
+      const none = { cloudDensity: 0, rainIntensity: 0 };
+      weatherEntries.push(...new Array(period).fill(none));
     } else {
       const curve = calculateCloudCurve(period);
-
-      console.log(period, curve);
-
-      new Array(period).fill(null).forEach((_, i) => {
-        const density = getCloudDensity(
-          i,
-          curve.length,
-          curve.max,
-          curve.upRation,
-          curve.downRatio,
-        );
-
-        weatherEntries.push({
-          cloudDensity: density,
-          rainIntensity: Math.max(0, density - curve.innerOffset),
-        });
-      });
+      weatherEntries.push(...generatePeriodData(curve));
     }
-
     hoursLeft -= period;
   }
+
   console.log(weatherEntries);
   return weatherEntries;
+}
+
+function generatePeriodData(curve: Curve) {
+  return new Array(curve.length).fill(null).map((_, i) => {
+    const density = getCloudDensity(
+      i,
+      curve.length,
+      curve.max,
+      curve.upRation,
+      curve.downRatio,
+    );
+
+    return ({
+      cloudDensity: density,
+      rainIntensity: Math.max(0, density - curve.innerOffset),
+    });
+  });
 }
 
 type Curve = {
@@ -58,7 +61,7 @@ type Curve = {
 function calculateCloudCurve(length: number): Curve {
   const outerMax = Math.random();
   const downStart = Math.random();
-  const innerOffset = Math.random() * outerMax;
+  const innerOffset = Math.random() * (outerMax ** 3);
 
   return {
     upRation: downStart,
